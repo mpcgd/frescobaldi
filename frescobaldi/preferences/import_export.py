@@ -22,10 +22,7 @@ A widget that provides a scheme selector, with New and Remove buttons.
 """
 
 
-try:
-    import xml.etree.ElementTree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET
 
 from PyQt6.QtGui import (
     QTextFormat, QColor, QTextCharFormat, QFont, QFontDatabase,
@@ -117,8 +114,8 @@ def importTheme(filename, widget, schemeWidget):
         tfd.defaultStyles[elt.tag] = eltToStyle(elt)
 
     for style in root.find('allStyles'):
-        if style not in tfd.allStyles:
-            tfd.allStyles[style] = {}
+        if style.tag not in tfd.allStyles:
+            tfd.allStyles[style.tag] = {}
         for elt in style:
             tfd.allStyles[style.tag][elt.tag] = eltToStyle(elt)
 
