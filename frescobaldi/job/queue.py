@@ -526,6 +526,7 @@ class GlobalJobQueue(QObject):
     """
 
     def __init__(self):
+        super().__init__()
         self.load_settings()
         self._crawler = JobQueue()
         self._engraver = JobQueue()

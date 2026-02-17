@@ -63,7 +63,7 @@ class JobManager(plugin.DocumentPlugin):
             app.jobStarted(self.document(), job)
 
     def _finished(self, success):
-        self.finished(job, success)
+        self.finished(self._job, success)
         app.jobFinished(self.document(), self._job, success)
 
     def job(self):
