@@ -122,6 +122,7 @@ class Highlighter(plugin.Plugin, QSyntaxHighlighter):
             if doc.__class__ == document.EditorDocument:
                 doc.loaded.connect(self._resetHighlighting)
                 doc.loaded.connect(self._resetFridge)
+                doc.closed.connect(self._resetFridge)
                 variables.manager(doc).changed.connect(self._variablesChange)
 
     def _variablesChange(self):
@@ -136,7 +137,7 @@ class Highlighter(plugin.Plugin, QSyntaxHighlighter):
         self.setHighlighting(metainfo.info(self.document()).highlighting)
 
     def _resetFridge(self):
-        """Reset the lexer state cache when a document is reloaded.
+        """Reset the lexer state cache when a document is reloaded or closed.
 
         The Fridge (ly.lex.Fridge / slexer.Fridge) stores every unique parser
         state it ever encounters in a plain list that only appends and never
@@ -146,8 +147,13 @@ class Highlighter(plugin.Plugin, QSyntaxHighlighter):
         frees the accumulated state tuples; Qt will repopulate it during the
         next full rehighlight pass triggered by the document load.
 
+        _initialState is also cleared because it holds an integer index into
+        the old Fridge.  Keeping a stale index while the Fridge is empty would
+        cause initialState() to return None and crash highlightBlock().
+
         """
         self._fridge = ly.lex.Fridge()
+        self._initialState = None
 
     def highlightBlock(self, text):
         """Called by Qt when the highlighting of the current line needs updating."""
