@@ -275,7 +275,7 @@ def encode(text, encoding=None, default_encoding='utf-8'):
     enc = encoding or variables.variables(text).get("coding")
     if enc:
         try:
-            return text.encode(encoding)
+            return text.encode(enc)
         except (LookupError, UnicodeError):
             pass
     return text.encode(default_encoding)
