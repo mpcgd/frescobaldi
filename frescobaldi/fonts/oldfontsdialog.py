@@ -25,9 +25,21 @@ It keeps its settings.
 """
 
 
+import sys
+
 from PyQt6.QtCore import QSettings
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QFontComboBox, QGridLayout, QLabel
+
+# LilyPond's traditional roman default is "Century Schoolbook L" (a Linux/URW
+# font).  That font does not exist on macOS or Windows, which causes Qt to
+# spend time building font-alias tables.  Choose a reasonable platform default.
+if sys.platform == "darwin":
+    _DEFAULT_ROMAN = "Palatino"
+elif sys.platform == "win32":
+    _DEFAULT_ROMAN = "Palatino Linotype"
+else:
+    _DEFAULT_ROMAN = "Century Schoolbook L"
 
 import app
 import qutil
@@ -107,7 +119,7 @@ fonts = #
     def loadSettings(self):
         s = QSettings()
         s.beginGroup("global_font_dialog")
-        roman = s.value("roman", "Century Schoolbook L", str)
+        roman = s.value("roman", _DEFAULT_ROMAN, str)
         self.romanCombo.setCurrentFont(QFont(roman))
         sans = s.value("sans", "sans-serif", str)
         self.sansCombo.setCurrentFont(QFont(sans))

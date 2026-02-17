@@ -6,7 +6,7 @@
 <rect transform="translate(2.6294, 3.1157)" x="-0.0650" y="-3.1157" width="0.1300" height="1.5000" ry="0.0400" fill="currentColor"/>
 <path transform="translate(1.7660, 1.6157) scale(0.0028, -0.0028)" d="M211 141c61 0 117 -33 117 -100c0 -71 -52 -121 -99 -149c-34 -20 -73 -33 -112 -33c-61 0 -117 33 -117 100c0 71 52 121 99 149c34 20 73 33 112 33z" fill="currentColor"/>
 <rect transform="translate(0.8634, 3.1157)" x="-0.0650" y="-2.6157" width="0.1300" height="1.5000" ry="0.0400" fill="currentColor"/>
-<text transform="translate(0.0000, 4.1193)" font-family="Century Schoolbook L" font-size="1.7461" text-anchor="start" fill="currentColor">
+<text transform="translate(0.0000, 4.1193)" font-family="Palatino, Palatino Linotype, Book Antiqua, serif" font-size="1.7461" text-anchor="start" fill="currentColor">
 <tspan>
 aa</tspan>
 </text>
