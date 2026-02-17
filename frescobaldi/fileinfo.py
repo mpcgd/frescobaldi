@@ -22,6 +22,7 @@ Computes and caches various information about files.
 """
 
 
+import collections
 import itertools
 import re
 import os
@@ -35,7 +36,52 @@ import util
 import variables
 
 
-_document_cache = filecache.FileCache()
+# Maximum number of parsed include-files (with their music trees) to keep in
+# memory at once.  Each entry can be several MB for a large score, so a
+# moderate ceiling prevents the cache from growing arbitrarily large over a
+# long editing session.
+_DOCUMENT_CACHE_MAX_SIZE = 200
+
+
+class _LRUFileCache(filecache.FileCache):
+    """A FileCache with a bounded number of entries using LRU eviction.
+
+    When the cache would exceed _max_size entries the least recently accessed
+    entry is evicted first so that the most useful (recently used) entries are
+    kept.  All mtime-based invalidation logic from FileCache is preserved.
+
+    """
+    def __init__(self, max_size=_DOCUMENT_CACHE_MAX_SIZE):
+        # Use an OrderedDict so we can track insertion/access order cheaply.
+        self._cache = collections.OrderedDict()
+        self._max_size = max_size
+
+    def __getitem__(self, filename):
+        # FileCache.__getitem__ may delete the entry (stale mtime) and raise
+        # KeyError.  Only promote the entry to MRU position on a cache hit.
+        value = super().__getitem__(filename)
+        if filename in self._cache:
+            self._cache.move_to_end(filename)
+        return value
+
+    def __setitem__(self, filename, value):
+        # Let the base class store (mtime, value) in self._cache.
+        super().__setitem__(filename, value)
+        # Ensure the entry is at the most-recently-used end of the dict.
+        if filename in self._cache:
+            self._cache.move_to_end(filename)
+        # Evict the least recently used entry until we are within the limit.
+        while len(self._cache) > self._max_size:
+            self._cache.popitem(last=False)
+
+    def __delitem__(self, filename):
+        super().__delitem__(filename)
+
+    def clear(self):
+        super().clear()
+
+
+_document_cache = _LRUFileCache()
 _suffix_chars_re = re.compile(r'[^-\w]', re.UNICODE)
 
 
