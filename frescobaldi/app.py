@@ -391,8 +391,10 @@ def editor_font(requested_family=None):
             if family in available_families:
                 _editor_font.setFamily(family)
                 break
-    # Caller requests should not override the global default
-    font = _editor_font
+    # Return a copy so that caller-requested families do not mutate the
+    # module-level _editor_font singleton.
+    from PyQt6.QtGui import QFont
+    font = QFont(_editor_font)
     if requested_family and requested_family in available_families:
         font.setFamily(requested_family)
     return font
