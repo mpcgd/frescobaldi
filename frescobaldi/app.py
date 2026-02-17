@@ -295,6 +295,62 @@ def job_queue():
         _job_queue = job.queue.GlobalJobQueue()
     return _job_queue
 
+# ---------------------------------------------------------------------------
+# Periodic garbage collection and memory reclamation
+# ---------------------------------------------------------------------------
+
+import gc as _gc
+
+_gc_timer = None           # kept alive at module level so it is not collected
+_GC_INTERVAL_MS = 5 * 60 * 1000  # 5 minutes
+
+
+def _collect_garbage():
+    """Collect Python garbage and encourage the OS allocator to return memory.
+
+    Python's pymalloc never releases pool memory back to the OS on its own.
+    Over a long editing session this causes the process to hold gigabytes of
+    virtual address space that was once used for short-lived objects (tokens,
+    parse trees, etc.) but is now sitting empty and has been swapped out by the
+    OS.  A full GC cycle combined with a platform-specific nudge to the C
+    allocator brings the resident set back toward only what is actually live.
+
+    The check is cross-platform:
+      - macOS  : malloc_zone_pressure_relief(NULL, 0)  via libSystem
+      - Linux  : malloc_trim(0)                        via libc
+      - Windows: HeapCompact(GetProcessHeap(), 0)      via kernel32
+    All calls are wrapped in a broad except so that any missing symbol or
+    library simply leaves the GC collect as the sole effect.
+    """
+    _gc.collect()
+    try:
+        import ctypes
+        import sys as _sys
+        if _sys.platform == 'darwin':
+            libc = ctypes.CDLL('libSystem.B.dylib')
+            libc.malloc_zone_pressure_relief(None, ctypes.c_size_t(0))
+        elif _sys.platform.startswith('linux'):
+            ctypes.CDLL('libc.so.6').malloc_trim(0)
+        elif _sys.platform == 'win32':
+            kernel32 = ctypes.windll.kernel32
+            kernel32.HeapCompact(kernel32.GetProcessHeap(), 0)
+    except Exception:
+        pass
+
+
+@oninit
+def _setup_gc_timer():
+    """Set up a repeating timer that calls _collect_garbage() every 5 minutes."""
+    from PyQt6.QtCore import QTimer
+    global _gc_timer
+    _gc_timer = QTimer()
+    _gc_timer.setInterval(_GC_INTERVAL_MS)
+    _gc_timer.timeout.connect(_collect_garbage)
+    _gc_timer.start()
+
+
+# ---------------------------------------------------------------------------
+
 _is_git_controlled = None
 
 def is_git_controlled():
