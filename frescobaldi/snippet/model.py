@@ -118,7 +118,7 @@ class SnippetModel(QAbstractItemModel):
             del self._names[row:end]
         finally:
             self.endRemoveRows()
-            return True
+        return True
 
     def saveSnippet(self, name, text, title):
         """Store a snippet.
