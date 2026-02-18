@@ -179,6 +179,23 @@ def test_all_svgs_are_valid_xml():
         except ET.ParseError as e:
             raise AssertionError(f"{path} invalid XML: {e}") from e
 
+def test_palatino_present_in_changed_svgs():
+    """The 7 SVGs that previously used 'Century Schoolbook L' must now reference Palatino."""
+    targets = [
+        "frescobaldi/symbols/dynamic_cresc.svg",
+        "frescobaldi/symbols/dynamic_decresc.svg",
+        "frescobaldi/symbols/dynamic_dim.svg",
+        "frescobaldi/symbols/clef_treble_8.svg",
+        "frescobaldi/symbols/spanner_melisma.svg",
+        "frescobaldi/symbols/note_ellipsis.svg",
+        "frescobaldi/icons/tools-rest.svg",
+    ]
+    for rel in targets:
+        content = (ROOT / rel).read_text()
+        assert "Palatino" in content, (
+            f"{rel}: expected 'Palatino' in font-family but it is missing"
+        )
+
 def test_oldfontsdialog_platform_aware_default():
     """oldfontsdialog.py must use a platform-aware _DEFAULT_ROMAN constant."""
     source = (FRESCOBALDI / "fonts/oldfontsdialog.py").read_text()
@@ -1112,6 +1129,7 @@ if __name__ == "__main__":
         # Section 3 — regression: svg font
         test_no_bare_century_schoolbook_in_svgs,
         test_all_svgs_are_valid_xml,
+        test_palatino_present_in_changed_svgs,
         test_oldfontsdialog_platform_aware_default,
         # Section 4 — regression: editor_font singleton
         test_editor_font_returns_copy_not_reference,
