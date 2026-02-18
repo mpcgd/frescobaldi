@@ -576,7 +576,9 @@ class Tree(Output):
         If node is not given, the root node is used.
 
         """
-        def iter_tree(node, cursor=[]):
+        def iter_tree(node, cursor=None):
+            if cursor is None:
+                cursor = []
             for n in node:
                 l = cursor + [n]
                 yield l
@@ -593,7 +595,9 @@ class Tree(Output):
         If node is not given, the entire tree is searched.
 
         """
-        def iter_tree_find(node, cursor=[]):
+        def iter_tree_find(node, cursor=None):
+            if cursor is None:
+                cursor = []
             for n in node:
                 l = cursor + [n]
                 if n.name == path:

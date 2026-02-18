@@ -47,7 +47,7 @@ class Repo(AbstractVCSRepo):
         self.rootDir = root
 
     @classmethod
-    def run_command(cls, cmd, args=[], dir=None):
+    def run_command(cls, cmd, args=None, dir=None):
         """
         run a git command and return its output
         as a string list.
@@ -57,6 +57,8 @@ class Repo(AbstractVCSRepo):
         If no dir is passed the running dir of
         Frescobaldi is used as default
         """
+        if args is None:
+            args = []
         dir = os.path.normpath(os.path.join(sys.path[0], '..')) if dir is None else dir
         from PyQt6.QtCore import QSettings
         s = QSettings()
@@ -97,7 +99,7 @@ class Repo(AbstractVCSRepo):
     # #########################
     # Internal helper functions
 
-    def _run_command(self, cmd, args=[]):
+    def _run_command(self, cmd, args=None):
         """
         run a git command and return its output
         as a string list.
