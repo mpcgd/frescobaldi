@@ -76,7 +76,7 @@ def deleteLater(*qobjs):
             obj.deleteLater()
 
 
-def addAccelerators(actions, used=[]):
+def addAccelerators(actions, used=None):
     """Adds accelerators to the list of QActions (or QLabels used as buddy).
 
     Actions that have accelerators are skipped, the accelerators that they use
@@ -87,7 +87,7 @@ def addAccelerators(actions, used=[]):
     """
     # filter out the actions that already have an accelerator
     todo = []
-    used = set(used)
+    used = set(used) if used is not None else set()
     for a in actions:
         if a.text():
             accel = getAccelerator(a.text())
